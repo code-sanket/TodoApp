@@ -30,10 +30,6 @@ import androidx.appcompat.widget.SearchView
     private lateinit var binding: ActivityMainBinding
      val list = arrayListOf<TodoModel>()
      var adapter = TodoAdapter(list , this)
-     lateinit var alarmManager: AlarmManager
-     lateinit var pendingIntent: PendingIntent
-
-
      val db by lazy {
          AppDatabase.getDatabase(this)
      }
@@ -160,21 +156,6 @@ import androidx.appcompat.widget.SearchView
      }
 
 
-
-     fun displayTodo(newText: String = "") {
-         db.todoDao().getTask().observe(this, Observer {
-             if(it.isNotEmpty()){
-                 list.clear()
-                 list.addAll(
-                     it.filter { todo ->
-                         todo.title.contains(newText,true)
-                     }
-                 )
-                 adapter.notifyDataSetChanged()
-             }
-         })
-     }
-
      override fun onCreateOptionsMenu(menu: Menu?): Boolean {
          menuInflater.inflate(R.menu.main_menu , menu)
 
@@ -206,6 +187,20 @@ import androidx.appcompat.widget.SearchView
 
          })
          return super.onCreateOptionsMenu(menu)
+     }
+
+     fun displayTodo(newText: String = "") {
+         db.todoDao().getTask().observe(this, Observer {
+             if(it.isNotEmpty()){
+                 list.clear()
+                 list.addAll(
+                     it.filter { todo ->
+                         todo.title.contains(newText,true)
+                     }
+                 )
+                 adapter.notifyDataSetChanged()
+             }
+         })
      }
 
      fun openNewTask(view: View) {

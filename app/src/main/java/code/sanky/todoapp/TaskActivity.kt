@@ -25,11 +25,8 @@ const val DB_NAME = "todo.db"
 class TaskActivity : AppCompatActivity(), View.OnClickListener {
     lateinit var binding: ActivityTaskBinding
     lateinit var myCalendar: Calendar
-    lateinit var reqList: ArrayList<Int>
-    lateinit var alarmManager: AlarmManager
-    lateinit var pendingIntent: PendingIntent
-    lateinit var dateSetListner : DatePickerDialog.OnDateSetListener
-    lateinit var timeSetListner : TimePickerDialog.OnTimeSetListener
+    lateinit var dateSetListener : DatePickerDialog.OnDateSetListener
+    lateinit var timeSetListener : TimePickerDialog.OnTimeSetListener
 
     var finalDate = 0L
     var finalTime = 0L
@@ -47,12 +44,10 @@ class TaskActivity : AppCompatActivity(), View.OnClickListener {
         binding.timeEdt.setOnClickListener(this)
         binding.saveBtn.setOnClickListener(this)
         setUpSpinner()
-        createNotificationChannel()
-
     }
 
     private fun setUpSpinner() {
-        val adapter = ArrayAdapter<String>(this , android.R.layout.simple_spinner_dropdown_item , label)
+        val adapter = ArrayAdapter(this , android.R.layout.simple_spinner_dropdown_item , label)
         label.sort()
         binding.spinnerCategory.adapter = adapter
     }
@@ -90,20 +85,18 @@ class TaskActivity : AppCompatActivity(), View.OnClickListener {
             }
             finish()
         }
-
-
     }
 
     private fun setTimeListner() {
         myCalendar = Calendar.getInstance()
-        timeSetListner = TimePickerDialog.OnTimeSetListener() { _: TimePicker, hoursOfDay : Int, min : Int->
+        timeSetListener = TimePickerDialog.OnTimeSetListener() { _: TimePicker, hoursOfDay : Int, min : Int->
             myCalendar.set(Calendar.HOUR_OF_DAY , hoursOfDay)
             myCalendar.set(Calendar.MINUTE , min)
             updateTime()
         }
 
         val timePickerDialog = TimePickerDialog(
-            this , timeSetListner , myCalendar.get(Calendar.HOUR_OF_DAY),
+            this , timeSetListener , myCalendar.get(Calendar.HOUR_OF_DAY),
             myCalendar.get(Calendar.MINUTE) , false
         )
         timePickerDialog.show()
@@ -119,7 +112,7 @@ class TaskActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun setListner() {
         myCalendar = Calendar.getInstance()
-        dateSetListner = DatePickerDialog.OnDateSetListener { _: DatePicker, year : Int, month : Int, dayOfMonth : Int ->
+        dateSetListener = DatePickerDialog.OnDateSetListener { _: DatePicker, year : Int, month : Int, dayOfMonth : Int ->
             myCalendar.set(Calendar.YEAR , year)
             myCalendar.set(Calendar.MONTH , month)
             myCalendar.set(Calendar.DAY_OF_MONTH , dayOfMonth)
@@ -127,7 +120,7 @@ class TaskActivity : AppCompatActivity(), View.OnClickListener {
         }
 
         val datePickerDialog = DatePickerDialog(
-            this , dateSetListner , myCalendar.get(Calendar.YEAR),
+            this , dateSetListener , myCalendar.get(Calendar.YEAR),
             myCalendar.get(Calendar.MONTH) , myCalendar.get(Calendar.DAY_OF_MONTH)
         )
 
@@ -141,40 +134,6 @@ class TaskActivity : AppCompatActivity(), View.OnClickListener {
         finalDate = myCalendar.time.time
         binding.dateEdt.setText(sdf.format(myCalendar.time))
         binding.timeInptLay.visibility = View.VISIBLE
-    }
-
-    private fun createNotificationChannel(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            val name : CharSequence = ("TodoNotificationChannel")
-            val description = "Channel For Todo"
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel("todoChannel" , name , importance)
-            channel.description = description
-            val notificationManager = getSystemService(
-                NotificationManager::class.java
-            )
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
-    fun setAlarm(){
-        var ran = (1..100).random()
-        if(!reqList.contains(ran)){
-            reqList.add(ran)
-        }else{
-            while (reqList.contains(ran)){
-                ran = (1..100).random()
-            }
-            reqList.add(ran)
-        }
-
-        alarmManager  = getSystemService(ALARM_SERVICE) as AlarmManager
-
-        val intent = Intent(this , AlarmReceiver::class.java)
-        pendingIntent = PendingIntent.getBroadcast(this , ran , intent , 0)
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP
-            , myCalendar.timeInMillis
-            , pendingIntent)
     }
 
 }
